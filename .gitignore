@@ -1,0 +1,18 @@
+# Skills and course MDs
+.agents
+.ai
+.course
+
+# Dependencies & build output (npm workspaces)
+node_modules
+dist
+**/node_modules
+**/dist
+
+# Azure Functions local
+api/local.settings.json
+
+# Env & logs
+*.log
+.env
+.env.local
