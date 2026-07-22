@@ -125,7 +125,8 @@ Validated locally: root build green; API package assembles and installs `@azure/
 
 ## Deploy record (filled after Phase 5)
 
-- Live URL: _pending_
+- Live URL: **https://calm-forest-0fc119503.7.azurestaticapps.net/**
+- API health: `/api/health` -> `{"status":"ok","service":"flowerpot-api"}` (HTTP 200)
 - Resource group: `10x-flowerpot-group`
-- Subscription: _pending (private VS sub id)_
-- Deployed at: _pending_
+- Subscription: private VS sub (tenant `thenorthalliance.com`)
+- Deployed at: 2026-07-22 (GitHub Actions run 29963385855)
