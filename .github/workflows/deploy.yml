@@ -1,0 +1,55 @@
+name: Deploy to Azure Static Web Apps
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    name: Build and Deploy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # Build at the repo root so npm workspaces resolve @flowerpot/shared,
+      # which is a workspace-only package (never published to npm). Building
+      # per-folder via Oryx would fail to resolve it — so we build here and
+      # hand SWA pre-built artifacts with skip_*_build below.
+      - name: Install and build all workspaces
+        run: |
+          npm ci
+          npm run build
+
+      # Assemble a self-contained Functions package. @flowerpot/shared is
+      # imported type-only, so it is erased at compile time and is NOT a
+      # runtime dependency — we drop it from the deploy manifest and install
+      # only @azure/functions into api-dist/node_modules.
+      - name: Assemble API deploy package
+        run: |
+          rm -rf api-dist
+          mkdir -p api-dist
+          cp -r api/dist api-dist/dist
+          cp api/host.json api-dist/host.json
+          node -e "const fs=require('fs');const p=require('./api/package.json');const deps=Object.assign({},p.dependencies);delete deps['@flowerpot/shared'];fs.writeFileSync('api-dist/package.json',JSON.stringify({name:p.name,version:p.version,main:p.main,dependencies:deps},null,2));"
+          cd api-dist
+          npm install --omit=dev --no-audit --no-fund
+
+      - name: Deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APP_API_KEY }}
+          action: upload
+          app_location: "frontend/dist"
+          api_location: "api-dist"
+          output_location: ""
+          skip_app_build: true
+          skip_api_build: true

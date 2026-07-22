@@ -9,6 +9,9 @@ dist
 **/node_modules
 **/dist
 
+# CI-assembled Azure Functions deploy package (see .github/workflows/deploy.yml)
+api-dist
+
 # Azure Functions local
 api/local.settings.json
 
