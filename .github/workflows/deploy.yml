@@ -3,6 +3,10 @@ name: Deploy to Azure Static Web Apps
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "context/**"
+      - "infra/**"
+      - "**/*.md"
   workflow_dispatch:
 
 permissions:
