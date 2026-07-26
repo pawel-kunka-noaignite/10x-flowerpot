@@ -1,5 +1,5 @@
 {
-  "name": "flowerpot",
+  "name": "10x-flowerpot",
   "version": "0.0.0",
   "private": true,
   "description": "Flowerpot — houseplant care scheduling (web/PWA).",
@@ -9,8 +9,8 @@
     "api"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace @flowerpot/frontend",
-    "build": "npm run build --workspace @flowerpot/frontend && npm run build --workspace @flowerpot/api",
-    "test": "npm run test --workspace @flowerpot/frontend"
+    "dev": "npm run dev --workspace @10x-flowerpot/frontend",
+    "build": "npm run build --workspace @10x-flowerpot/frontend && npm run build --workspace @10x-flowerpot/api",
+    "test": "npm run test --workspace @10x-flowerpot/frontend"
   }
 }

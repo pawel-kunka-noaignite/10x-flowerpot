@@ -1,4 +1,4 @@
-import type { CareAction } from "@flowerpot/shared";
+import type { CareAction } from "@10x-flowerpot/shared";
 
 /** Human-readable label for a care action, used across the UI. */
 export function careActionLabel(action: CareAction): string {

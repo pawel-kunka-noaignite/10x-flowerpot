@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: "22"
 
-      # Build at the repo root so npm workspaces resolve @flowerpot/shared,
+      # Build at the repo root so npm workspaces resolve @10x-flowerpot/shared,
       # which is a workspace-only package (never published to npm). Building
       # per-folder via Oryx would fail to resolve it — so we build here and
       # hand SWA pre-built artifacts with skip_*_build below.
@@ -29,7 +29,7 @@ jobs:
           npm ci
           npm run build
 
-      # Assemble a self-contained Functions package. @flowerpot/shared is
+      # Assemble a self-contained Functions package. @10x-flowerpot/shared is
       # imported type-only, so it is erased at compile time and is NOT a
       # runtime dependency — we drop it from the deploy manifest and install
       # only @azure/functions into api-dist/node_modules.
@@ -39,7 +39,7 @@ jobs:
           mkdir -p api-dist
           cp -r api/dist api-dist/dist
           cp api/host.json api-dist/host.json
-          node -e "const fs=require('fs');const p=require('./api/package.json');const deps=Object.assign({},p.dependencies);delete deps['@flowerpot/shared'];fs.writeFileSync('api-dist/package.json',JSON.stringify({name:p.name,version:p.version,main:p.main,dependencies:deps},null,2));"
+          node -e "const fs=require('fs');const p=require('./api/package.json');const deps=Object.assign({},p.dependencies);delete deps['@10x-flowerpot/shared'];fs.writeFileSync('api-dist/package.json',JSON.stringify({name:p.name,version:p.version,main:p.main,dependencies:deps},null,2));"
           cd api-dist
           npm install --omit=dev --no-audit --no-fund
 

@@ -1,5 +1,5 @@
 {
-  "name": "@flowerpot/api",
+  "name": "@10x-flowerpot/api",
   "version": "0.0.0",
   "description": "Flowerpot Azure Functions API",
   "main": "dist/src/functions/*.js",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@azure/functions": "^4.0.0",
-    "@flowerpot/shared": "*"
+    "@10x-flowerpot/shared": "*"
   },
   "devDependencies": {
     "@types/node": "18.x",
