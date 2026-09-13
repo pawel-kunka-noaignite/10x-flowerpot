@@ -66,6 +66,7 @@
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
+  padding: 0 1rem;
   border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
