@@ -3,7 +3,7 @@ import { TableClient } from "@azure/data-tables";
 import { getTableClient } from "../lib/tableClient";
 import type { Plant, CreatePlantDto, LightExposure } from "@10x-flowerpot/shared";
 
-const TABLE_NAME = "10xflowerpotdata";
+const TABLE_NAME = "flowerpotdata";
 
 /**
  * Validates a CreatePlantDto object.

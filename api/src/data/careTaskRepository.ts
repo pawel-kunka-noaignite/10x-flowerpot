@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { getTableClient } from "../lib/tableClient";
 import type { CareTask, CareAction } from "@10x-flowerpot/shared";
 
-const TABLE_NAME = "10xflowerpottasks";
+const TABLE_NAME = "flowerpottasks";
 
 /**
  * Creates a new care task for a plant.
