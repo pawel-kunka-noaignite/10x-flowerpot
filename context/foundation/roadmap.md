@@ -32,7 +32,7 @@ Flowerpot planuje pielęgnację roślin domowych jako per-roślinny harmonogram,
 | F-01 | data-persistence | (foundation) warstwa danych z izolacją per-user | — | NFR (izolacja danych), Access Control | ready |
 | F-02 | auth-swa | (foundation) logowanie i weryfikacja tożsamości (wbudowane uwierzytelnianie Azure Static Web Apps) | — | FR-001, FR-002, US-05 | done |
 | F-03 | species-seed | (foundation) kuratorowany seed ~15-20 gatunków z bazowymi interwałami | — | FR-030 | done |
-| S-01 | user-sign-in | zaloguje się i widzi wyłącznie własną (pustą) przestrzeń | F-02 | US-05, FR-001, FR-002 | proposed |
+| S-01 | user-sign-in | zaloguje się i widzi wyłącznie własną (pustą) przestrzeń | F-02 | US-05, FR-001, FR-002 | done |
 | S-02 | add-plant-schedule | doda roślinę i od razu widzi wyliczony harmonogram | F-01, F-03, S-01 | US-01, FR-010, FR-020, FR-030 | proposed |
 | S-03 | manage-plants | przegląda, edytuje i usuwa swoje rośliny | S-02 | FR-011, FR-012, FR-013 | proposed |
 | S-04 | care-dashboard | widzi zadania "dziś" i "w tym tygodniu" ze wszystkich roślin | S-02 | US-02, FR-021 | proposed |
@@ -117,7 +117,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Guardrail sukcesu ("user nigdy nie widzi cudzych danych") i twardy prereq gwiazdy przewodniej — dlatego przed S-02, mimo że sam w sobie nie dowodzi tezy produktu.
-- **Status:** proposed
+- **Status:** done
 
 ### S-02: Dodanie rośliny z wyliczonym harmonogramem
 
@@ -213,5 +213,6 @@ Brak otwartych pytań blokujących — F-01 i F-02 rozstrzygnięte pivotami z 20
 
 - **F-02: (foundation) logowanie i weryfikacja tożsamości (wbudowane uwierzytelnianie Azure Static Web Apps)** — Archived 2026-09-13 → `context/archive/2026-09-13-auth-swa/`. Lesson: —.
 - **F-03: (foundation) kuratorowany seed ~15-20 gatunków z bazowymi interwałami** — Archived 2026-09-13 → `context/archive/2026-09-13-species-seed/`. Lesson: —.
+- **S-01: zaloguje się i widzi wyłącznie własną (pustą) przestrzeń** — Archived 2026-09-13 → `context/archive/2026-09-13-s-01-user-sign-in/`. Lesson: —.
 
 (Empty on first generation. `/10x-archive` appends entries here when a matching change is archived.)

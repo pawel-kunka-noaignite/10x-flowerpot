@@ -1,8 +1,10 @@
 ---
 id: s-01-user-sign-in
 title: User Sign-In UI and Access Control
-status: implemented
+status: archived
 created: 2026-09-13
+archived_at: 2026-09-13T11:27:00Z
+updated: 2026-09-13
 prd_refs:
   - US-05
   - FR-001
