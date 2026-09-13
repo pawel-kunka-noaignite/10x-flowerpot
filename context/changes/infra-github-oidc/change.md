@@ -1,7 +1,7 @@
 ---
 change_id: infra-github-oidc
 title: Setup GitHub OIDC federation with managed identity
-status: new
+status: implemented
 created: 2026-09-13
 updated: 2026-09-13
 archived_at: null
