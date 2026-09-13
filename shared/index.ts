@@ -45,6 +45,11 @@ export interface CreatePlantDto {
 
 export type UpdatePlantDto = Partial<Omit<CreatePlantDto, never>>;
 
+export interface PlantWithTasksResponse {
+  plant: Plant;
+  initialTasks: CareTask[];
+}
+
 export interface HealthResponse {
   status: "ok";
   service: string;

@@ -5,6 +5,16 @@ import type { Species } from "@10x-flowerpot/shared";
  * intervals (days), before season/light adjustment. Read-only, no per-user
  * data — safe to keep as a static in-memory constant.
  */
+/**
+ * Retrieves a species by its ID from the seed data.
+ *
+ * @param speciesId - The species identifier
+ * @returns The Species object, or undefined if not found
+ */
+export function getSpeciesById(speciesId: string): Species | undefined {
+  return SPECIES_SEED.find((s) => s.id === speciesId);
+}
+
 export const SPECIES_SEED: Species[] = [
   { id: "monstera-deliciosa", commonName: "Monstera", baseIntervals: { water: 7, fertilize: 30, prune: 90 } },
   { id: "sansevieria-trifasciata", commonName: "Wężownica (sansewieria)", baseIntervals: { water: 21, fertilize: 60, prune: 180 } },

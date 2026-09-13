@@ -1,5 +1,5 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import type { Plant, CreatePlantDto } from "@10x-flowerpot/shared";
+import type { Plant, CreatePlantDto, PlantWithTasksResponse } from "@10x-flowerpot/shared";
 import { getUserId } from "../lib/auth";
 import {
   createPlant,
@@ -7,11 +7,14 @@ import {
   updatePlant,
   deletePlant,
 } from "../data/plantRepository";
+import { createCareTask } from "../data/careTaskRepository";
+import { computeSchedule } from "../lib/scheduleEngine";
+import { getSpeciesById } from "../data/speciesSeed";
 
 /**
  * HTTP handler for plant endpoints.
  * GET: List all plants for the authenticated user
- * POST: Create a new plant for the authenticated user
+ * POST: Create a new plant for the authenticated user (with initial schedule)
  */
 async function plants(
   request: HttpRequest,
@@ -39,9 +42,47 @@ async function plants(
       const body = await request.json();
       const dto = body as CreatePlantDto;
       const plant = await createPlant(userId, dto);
+
+      // Compute schedule and create initial care tasks
+      const species = getSpeciesById(dto.speciesId);
+      if (!species) {
+        context.log(`Warning: Species ${dto.speciesId} not found in seed data`);
+        // Return plant without tasks if species not found
+        return {
+          status: 201,
+          jsonBody: { plant, initialTasks: [] } as PlantWithTasksResponse,
+        };
+      }
+
+      const now = new Date();
+      const schedule = computeSchedule(plant, species, now);
+
+      const initialTasks = [];
+      for (const scheduledTask of schedule) {
+        try {
+          const task = await createCareTask(
+            userId,
+            plant.id,
+            scheduledTask.action,
+            scheduledTask.dueAt
+          );
+          initialTasks.push(task);
+        } catch (taskError) {
+          context.log(
+            `Warning: Failed to create ${scheduledTask.action} task for plant ${plant.id}: ${taskError}`
+          );
+          // Continue creating other tasks even if one fails
+        }
+      }
+
+      const response: PlantWithTasksResponse = {
+        plant,
+        initialTasks,
+      };
+
       return {
         status: 201,
-        jsonBody: plant,
+        jsonBody: response,
       };
     }
 
