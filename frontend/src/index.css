@@ -64,7 +64,7 @@
 
 #root {
   width: 100%;
-  max-width: 100%;
+  max-width: 1000px;
   margin: 0 auto;
   border-inline: 1px solid var(--border);
   min-height: 100svh;

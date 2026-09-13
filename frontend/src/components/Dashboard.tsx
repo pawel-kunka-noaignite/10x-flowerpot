@@ -117,7 +117,7 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
     gap: '1.5rem',
-    marginTop: '1.5rem',
+    marginTop: '2.5rem',
   },
   emptyState: {
     padding: '2rem',
