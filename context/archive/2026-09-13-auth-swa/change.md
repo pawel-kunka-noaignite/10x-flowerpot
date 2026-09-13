@@ -1,9 +1,10 @@
 ---
 change_id: auth-swa
 title: Wire up Azure Static Web Apps built-in authentication
-status: in-progress
+status: archived
 created: 2026-09-13
 updated: 2026-09-13
+archived_at: 2026-09-13T00:00:00Z
 ---
 
 ## Notes

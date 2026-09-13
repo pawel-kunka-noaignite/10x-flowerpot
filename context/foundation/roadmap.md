@@ -30,7 +30,7 @@ Flowerpot planuje pielęgnację roślin domowych jako per-roślinny harmonogram,
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 |---|---|---|---|---|---|
 | F-01 | data-persistence | (foundation) warstwa danych z izolacją per-user | — | NFR (izolacja danych), Access Control | ready |
-| F-02 | auth-swa | (foundation) logowanie i weryfikacja tożsamości (wbudowane uwierzytelnianie Azure Static Web Apps) | — | FR-001, FR-002, US-05 | ready |
+| F-02 | auth-swa | (foundation) logowanie i weryfikacja tożsamości (wbudowane uwierzytelnianie Azure Static Web Apps) | — | FR-001, FR-002, US-05 | done |
 | F-03 | species-seed | (foundation) kuratorowany seed ~15-20 gatunków z bazowymi interwałami | — | FR-030 | done |
 | S-01 | user-sign-in | zaloguje się i widzi wyłącznie własną (pustą) przestrzeń | F-02 | US-05, FR-001, FR-002 | proposed |
 | S-02 | add-plant-schedule | doda roślinę i od razu widzi wyliczony harmonogram | F-01, F-03, S-01 | US-01, FR-010, FR-020, FR-030 | proposed |
@@ -89,7 +89,8 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Unknowns:** —
 - **Decyzja (2026-09-13):** SWA built-in auth zamiast Entra External ID + MSAL — zero nowego tenantu/zasobu Azure; `staticwebapp.config.json` definiuje `routes`/`role`, Functions czytają nagłówek zamiast weryfikować JWT ręcznie.
 - **Risk:** Prostsze niż osobny tenant IdP; kompromis — mniejsza kontrola nad UX logowania, akceptowalny dla MVP certyfikacyjnego.
-- **Status:** ready
+- **Implementation:** `frontend/public/staticwebapp.config.json` (route rules) + `api/src/lib/auth.ts#getUserId` (principal header parsing, unit-tested). Archived 2026-09-13 → `context/archive/2026-09-13-auth-swa/`.
+- **Status:** done
 
 ### F-03: Seed gatunków
 
@@ -210,6 +211,7 @@ Brak otwartych pytań blokujących — F-01 i F-02 rozstrzygnięte pivotami z 20
 
 ## Done
 
+- **F-02: (foundation) logowanie i weryfikacja tożsamości (wbudowane uwierzytelnianie Azure Static Web Apps)** — Archived 2026-09-13 → `context/archive/2026-09-13-auth-swa/`. Lesson: —.
 - **F-03: (foundation) kuratorowany seed ~15-20 gatunków z bazowymi interwałami** — Archived 2026-09-13 → `context/archive/2026-09-13-species-seed/`. Lesson: —.
 
 (Empty on first generation. `/10x-archive` appends entries here when a matching change is archived.)
