@@ -6,7 +6,7 @@ resource groupIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01
     name: 'github-oidc'
     properties: {
       issuer: 'https://token.actions.githubusercontent.com'
-      subject: 'repo:pawel-kunka-noaignite/10x-flowerpot:*'
+      subject: 'repo:pawel-kunka-noaignite@246105833/10x-flowerpot@1309251766:ref:refs/heads/main'
       audiences: ['api://AzureADTokenExchange']
     }
   }
