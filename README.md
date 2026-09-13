@@ -82,10 +82,19 @@ npm test --workspace @10x-flowerpot/frontend   # Frontend tests only (30 tests)
 Deployed live at: **https://calm-forest-0fc119503.7.azurestaticapps.net/**
 
 Deployment via GitHub Actions (`.github/workflows/deploy.yml`):
+- **Infra-first**: Deploys Bicep (SWA + Storage Account + RBAC) via Azure CLI + OIDC federation
 - Builds frontend (Vite) + API (tsc)
 - Packages API as self-contained Functions bundle
 - Deploys to Azure Static Web Apps (SPA + API)
 - Automatic on `main` branch push (excludes `context/` and markdown)
+
+### Authentication: Managed Identity + RBAC
+
+The API uses **Azure Managed Identity** to authenticate with Table Storage (production-grade security, no connection strings):
+- SWA has system-assigned managed identity
+- Managed identity granted `Storage Table Data Contributor` RBAC role on Storage Account
+- API code uses `@azure/identity` + `DefaultAzureCredential` (works in dev, CI/CD, and production)
+- See `DEPLOYMENT.md` for OIDC federation setup
 
 ## Infrastructure (Bicep IaC)
 
