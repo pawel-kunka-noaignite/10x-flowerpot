@@ -1,7 +1,7 @@
 ---
 change_id: infra-managed-identity
 title: Upgrade Storage auth to Managed Identity + RBAC
-status: complete
+status: implemented
 created: 2026-09-13
 updated: 2026-09-13
 archived_at: null
