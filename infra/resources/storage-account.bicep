@@ -12,11 +12,10 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     allowBlobPublicAccess: false
     minimumTlsVersion: 'TLS1_2'
   }
-}
 
-resource tableService 'Microsoft.Storage/storageAccounts/tableServices@2023-01-01' = {
-  parent: storageAccount
-  name: 'default'
+  resource tableService 'tableServices' = {
+    name: 'default'
+  }
 }
 
 module storageTableDataContributorRoleModule '../roles/storage-table-data-contributor.bicep' = {

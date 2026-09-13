@@ -25,7 +25,8 @@ jobs:
           inlineScript: |
             az deployment group create \
               --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-              --template-file infra/main.bicep
+              --template-file infra/main.bicep \
+              --parameters deploymentTrigger=Automatic
         env:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
