@@ -1,7 +1,7 @@
 param swaIdentityPrincipalId string
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: '10xflowerpotdata'
+  name: '10xflowerpot'
   location: resourceGroup().location
   kind: 'StorageV2'
   sku: {
@@ -19,23 +19,11 @@ resource tableService 'Microsoft.Storage/storageAccounts/tableServices@2023-01-0
   name: 'default'
 }
 
-// Assign Storage Table Data Contributor role to SWA's managed identity
-var storageTableDataContributorRoleId = '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
-
-resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: storageAccount
-  name: guid(
-    storageAccount.id,
-    swaIdentityPrincipalId,
-    storageTableDataContributorRoleId
-  )
-  properties: {
-    roleDefinitionId: subscriptionResourceId(
-      'Microsoft.Authorization/roleDefinitions',
-      storageTableDataContributorRoleId
-    )
+module storageTableDataContributorRoleModule '../roles/storage-table-data-contributor.bicep' = {
+  name: 'iam-swa-storage-table-data-contributor'
+  params: {
+    storageAccountName: storageAccount.name
     principalId: swaIdentityPrincipalId
-    principalType: 'ServicePrincipal'
   }
 }
 

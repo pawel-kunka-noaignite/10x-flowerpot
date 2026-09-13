@@ -10,7 +10,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write
+  id-token: write  # Required for OIDC token exchange with managed identity
 
 jobs:
   build_and_deploy:
@@ -19,17 +19,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy Infrastructure
+      - name: Deploy Infrastructure (Bicep)
         uses: azure/cli@v2
         with:
           inlineScript: |
             az deployment group create \
-              --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
               --template-file infra/main.bicep
         env:
-          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
-          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
