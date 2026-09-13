@@ -3,7 +3,7 @@ project: "Flowerpot"
 version: 1
 status: draft
 created: 2026-07-26
-updated: 2026-07-26
+updated: 2026-09-13
 prd_version: 1
 main_goal: speed
 top_blocker: decisions
@@ -31,7 +31,7 @@ Flowerpot planuje pielęgnację roślin domowych jako per-roślinny harmonogram,
 |---|---|---|---|---|---|
 | F-01 | data-persistence | (foundation) warstwa danych z izolacją per-user | — | NFR (izolacja danych), Access Control | blocked |
 | F-02 | auth-entra-external | (foundation) logowanie i weryfikacja tożsamości (Entra External ID + MSAL) | — | FR-001, FR-002, US-05 | ready |
-| F-03 | species-seed | (foundation) kuratorowany seed ~15-20 gatunków z bazowymi interwałami | — | FR-030 | planning |
+| F-03 | species-seed | (foundation) kuratorowany seed ~15-20 gatunków z bazowymi interwałami | — | FR-030 | done |
 | S-01 | user-sign-in | zaloguje się i widzi wyłącznie własną (pustą) przestrzeń | F-02 | US-05, FR-001, FR-002 | proposed |
 | S-02 | add-plant-schedule | doda roślinę i od razu widzi wyliczony harmonogram | F-01, F-03, S-01 | US-01, FR-010, FR-020, FR-030 | proposed |
 | S-03 | manage-plants | przegląda, edytuje i usuwa swoje rośliny | S-02 | FR-011, FR-012, FR-013 | proposed |
@@ -101,7 +101,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Może być statyczną stałą w `shared/` — nie zależy od decyzji datastore, więc gotowy do planowania od razu; ryzyko tylko w jakości/kompletności danych gatunków.
-- **Status:** planning
+- **Status:** done
 
 ## Slices
 
@@ -208,5 +208,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Tryb offline-first** — Why parked: PRD §Non-Goals (aplikacja zakłada łączność).
 
 ## Done
+
+- **F-03: (foundation) kuratorowany seed ~15-20 gatunków z bazowymi interwałami** — Archived 2026-09-13 → `context/archive/2026-09-13-species-seed/`. Lesson: —.
 
 (Empty on first generation. `/10x-archive` appends entries here when a matching change is archived.)
