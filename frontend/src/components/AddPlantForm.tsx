@@ -3,9 +3,10 @@ import type { CreatePlantDto, Species, PlantWithTasksResponse } from '@10x-flowe
 
 interface AddPlantFormProps {
   onPlantAdded?: (response: PlantWithTasksResponse) => void;
+  onCancel?: () => void;
 }
 
-export function AddPlantForm({ onPlantAdded }: AddPlantFormProps) {
+export function AddPlantForm({ onPlantAdded, onCancel }: AddPlantFormProps) {
   const [species, setSpecies] = useState<Species[]>([]);
   const [loading, setLoading] = useState(false);
   const [speciesLoading, setSpeciesLoading] = useState(true);
@@ -92,18 +93,30 @@ export function AddPlantForm({ onPlantAdded }: AddPlantFormProps) {
   };
 
   if (speciesLoading) {
-    return <div style={{ padding: '1rem' }}>Loading species...</div>;
+    return <div style={styles.loading}>Loading species...</div>;
   }
 
   return (
     <form onSubmit={handleSubmit} style={styles.form}>
-      <h3>Add a New Plant</h3>
+      <div style={styles.formHeader}>
+        <h3 style={styles.heading}>Add a New Plant</h3>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            aria-label="Close"
+            style={styles.closeButton}
+          >
+            ×
+          </button>
+        )}
+      </div>
 
       {error && <div style={styles.error}>{error}</div>}
       {success && <div style={styles.success}>Plant added successfully!</div>}
 
       <div style={styles.formGroup}>
-        <label htmlFor="speciesId">Species:</label>
+        <label htmlFor="speciesId" style={styles.label}>Species:</label>
         <select
           id="speciesId"
           name="speciesId"
@@ -111,6 +124,7 @@ export function AddPlantForm({ onPlantAdded }: AddPlantFormProps) {
           onChange={handleChange}
           required
           disabled={loading}
+          style={styles.input}
         >
           {species.map((s) => (
             <option key={s.id} value={s.id}>
@@ -121,7 +135,7 @@ export function AddPlantForm({ onPlantAdded }: AddPlantFormProps) {
       </div>
 
       <div style={styles.formGroup}>
-        <label htmlFor="nickname">Nickname:</label>
+        <label htmlFor="nickname" style={styles.label}>Nickname:</label>
         <input
           id="nickname"
           type="text"
@@ -131,17 +145,19 @@ export function AddPlantForm({ onPlantAdded }: AddPlantFormProps) {
           placeholder="e.g., My Monstera"
           required
           disabled={loading}
+          style={styles.input}
         />
       </div>
 
       <div style={styles.formGroup}>
-        <label htmlFor="lightExposure">Light Exposure:</label>
+        <label htmlFor="lightExposure" style={styles.label}>Light Exposure:</label>
         <select
           id="lightExposure"
           name="lightExposure"
           value={formData.lightExposure}
           onChange={handleChange}
           disabled={loading}
+          style={styles.input}
         >
           <option value="low">Low</option>
           <option value="medium">Medium</option>
@@ -150,7 +166,7 @@ export function AddPlantForm({ onPlantAdded }: AddPlantFormProps) {
       </div>
 
       <div style={styles.formGroup}>
-        <label htmlFor="lastWateredAt">Last Watered:</label>
+        <label htmlFor="lastWateredAt" style={styles.label}>Last Watered:</label>
         <input
           id="lastWateredAt"
           type="date"
@@ -158,6 +174,7 @@ export function AddPlantForm({ onPlantAdded }: AddPlantFormProps) {
           value={formData.lastWateredAt}
           onChange={handleChange}
           disabled={loading}
+          style={styles.input}
         />
       </div>
 
@@ -182,33 +199,67 @@ const styles = {
     flexDirection: 'column' as const,
     gap: '1rem',
     padding: '1.5rem',
-    border: '1px solid #e0e0e0',
+    border: '1px solid var(--border)',
     borderRadius: '8px',
-    backgroundColor: '#fafafa',
+    backgroundColor: 'var(--code-bg)',
+  },
+  formHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  heading: {
+    margin: 0,
+    color: 'var(--text-h)',
+  },
+  closeButton: {
+    background: 'none',
+    border: 'none',
+    color: 'var(--text)',
+    fontSize: '1.5rem',
+    lineHeight: 1,
+    cursor: 'pointer',
+    padding: '0 0.25rem',
   },
   formGroup: {
     display: 'flex',
     flexDirection: 'column' as const,
     gap: '0.5rem',
   },
+  label: {
+    color: 'var(--text)',
+  },
+  input: {
+    padding: '0.5rem',
+    borderRadius: '4px',
+    border: '1px solid var(--border)',
+    backgroundColor: 'var(--bg)',
+    color: 'var(--text-h)',
+    fontFamily: 'inherit',
+    fontSize: '1rem',
+  },
+  loading: {
+    padding: '1rem',
+    color: 'var(--text)',
+  },
   error: {
     padding: '0.75rem',
-    backgroundColor: '#fdd',
-    color: '#c33',
+    backgroundColor: 'var(--error-bg)',
+    color: 'var(--error-text)',
     borderRadius: '4px',
     fontSize: '0.9rem',
   },
   success: {
     padding: '0.75rem',
-    backgroundColor: '#dfd',
-    color: '#3c3',
+    backgroundColor: 'var(--success-bg)',
+    color: 'var(--success-text)',
     borderRadius: '4px',
     fontSize: '0.9rem',
   },
   button: {
     padding: '0.75rem 1rem',
-    backgroundColor: '#4caf50',
-    color: 'white',
+    backgroundColor: 'var(--button-bg)',
+    color: 'var(--button-text)',
     border: 'none',
     borderRadius: '4px',
     fontSize: '1rem',

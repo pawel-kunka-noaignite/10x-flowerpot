@@ -3,11 +3,17 @@ import type { Plant, CareTask, PlantWithTasksResponse } from '@10x-flowerpot/sha
 import { AddPlantForm } from './AddPlantForm';
 import { PlantCard } from './PlantCard';
 
+interface DashboardProps {
+  showAddForm: boolean;
+  onCloseAddForm: () => void;
+}
+
 /**
  * Dashboard is the authenticated landing page.
- * Shows the add plant form and a list of the user's plants with their care tasks.
+ * Shows the user's plants with their care tasks. The "Add Plant" form is
+ * opened on demand (via the header button) as a modal overlay.
  */
-export function Dashboard() {
+export function Dashboard({ showAddForm, onCloseAddForm }: DashboardProps) {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [tasks, setTasks] = useState<CareTask[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +61,8 @@ export function Dashboard() {
     setPlants((prev) => [...prev, response.plant]);
     // Add new tasks to list
     setTasks((prev) => [...prev, ...response.initialTasks]);
+    // Close the modal now that the plant has been added
+    onCloseAddForm();
   };
 
   const getPlantTasks = (plantId: string): CareTask[] => {
@@ -63,37 +71,35 @@ export function Dashboard() {
 
   return (
     <div style={styles.container}>
-      <h1>Flowerpot Dashboard</h1>
+      <h1 style={styles.heading}>Your Plants</h1>
 
       {error && <div style={styles.error}>{error}</div>}
 
-      {/* Add Plant Form Section */}
-      <section style={styles.formSection}>
-        <AddPlantForm onPlantAdded={handlePlantAdded} />
-      </section>
+      {loading ? (
+        <div style={styles.loading}>Loading plants...</div>
+      ) : plants.length === 0 ? (
+        <div style={styles.emptyState}>
+          <p>No plants yet. Click "+ Add Plant" to get started!</p>
+        </div>
+      ) : (
+        <div style={styles.plantsList}>
+          {plants.map((plant) => (
+            <PlantCard
+              key={plant.id}
+              plant={plant}
+              tasks={getPlantTasks(plant.id)}
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Plants List Section */}
-      <section style={styles.plantsSection}>
-        <h2>Your Plants</h2>
-
-        {loading ? (
-          <div style={styles.loading}>Loading plants...</div>
-        ) : plants.length === 0 ? (
-          <div style={styles.emptyState}>
-            <p>No plants yet. Add one to get started!</p>
+      {showAddForm && (
+        <div style={styles.modalBackdrop} onClick={onCloseAddForm}>
+          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <AddPlantForm onPlantAdded={handlePlantAdded} onCancel={onCloseAddForm} />
           </div>
-        ) : (
-          <div style={styles.plantsList}>
-            {plants.map((plant) => (
-              <PlantCard
-                key={plant.id}
-                plant={plant}
-                tasks={getPlantTasks(plant.id)}
-              />
-            ))}
-          </div>
-        )}
-      </section>
+        </div>
+      )}
     </div>
   );
 }
@@ -104,11 +110,8 @@ const styles = {
     maxWidth: '900px',
     margin: '0 auto',
   },
-  formSection: {
-    marginBottom: '3rem',
-  },
-  plantsSection: {
-    marginTop: '2rem',
+  heading: {
+    color: 'var(--text-h)',
   },
   plantsList: {
     display: 'grid',
@@ -119,20 +122,36 @@ const styles = {
   emptyState: {
     padding: '2rem',
     textAlign: 'center' as const,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'var(--code-bg)',
     borderRadius: '8px',
-    color: '#666',
+    color: 'var(--text)',
   },
   loading: {
     padding: '2rem',
     textAlign: 'center' as const,
-    color: '#999',
+    color: 'var(--text)',
   },
   error: {
     padding: '1rem',
-    backgroundColor: '#fdd',
-    color: '#c33',
+    backgroundColor: 'var(--error-bg)',
+    color: 'var(--error-text)',
     borderRadius: '4px',
     marginBottom: '1.5rem',
+  },
+  modalBackdrop: {
+    position: 'fixed' as const,
+    inset: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1rem',
+    zIndex: 100,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: '420px',
+    maxHeight: '90vh',
+    overflowY: 'auto' as const,
   },
 };
