@@ -6,6 +6,11 @@ module staticWebAppModule 'resources/static-web-app.bicep' = {
 
 module storageAccountModule 'resources/storage-account.bicep' = {
   name: getModuleName('storage-account')
+  params: {
+    swaIdentityPrincipalId: staticWebAppModule.outputs.principalId
+  }
 }
 
-output storageConnectionString string = storageAccountModule.outputs.connectionString
+output staticWebAppName string = staticWebAppModule.outputs.name
+output staticWebAppHostname string = staticWebAppModule.outputs.hostname
+output storageAccountName string = storageAccountModule.outputs.name
