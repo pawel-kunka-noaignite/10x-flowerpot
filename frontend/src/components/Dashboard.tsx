@@ -108,7 +108,6 @@ const styles = {
   container: {
     width: '100%',
     padding: '2rem',
-    maxWidth: '1000px',
     margin: '0 auto',
   },
   heading: {
