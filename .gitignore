@@ -12,6 +12,12 @@ dist
 # CI-assembled Azure Functions deploy package (see .github/workflows/deploy.yml)
 api-dist
 
+# Bicep compiled output (az bicep build generates .json, keep .bicep only)
+infra/*.json
+
+# Root workspace lock file (npm workspaces generates automatically)
+/package-lock.json
+
 # Azure Functions local
 api/local.settings.json
 
