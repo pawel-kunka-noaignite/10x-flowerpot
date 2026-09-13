@@ -9,13 +9,13 @@ import { DefaultAzureCredential } from "@azure/identity";
  *   - Local Azure CLI authentication
  *
  * @param tableName - Name of the table to connect to
- * @param storageAccountName - Name of the storage account (e.g., "10xflowerpotdata")
+ * @param storageAccountName - Name of the storage account (must match infra/resources/storage-account.bicep)
  * @returns TableClient instance for the specified table
  * @throws Error if credentials cannot be resolved or storage account is not configured
  */
 export function getTableClient(
   tableName: string,
-  storageAccountName: string = "10xflowerpotdata"
+  storageAccountName: string = "10xflowerpot"
 ): TableClient {
   const storageUri = `https://${storageAccountName}.table.core.windows.net`;
 
