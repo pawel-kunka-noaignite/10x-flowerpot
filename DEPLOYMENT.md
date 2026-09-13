@@ -1,151 +1,88 @@
-# Production Deployment Guide: Managed Identity + RBAC
+# Production Deployment Guide
 
-## Prerequisite: GitHub OIDC Federation Setup
+## Authentication model
 
-Before triggering a deploy, configure GitHub Actions OIDC federation for Azure:
+CI/CD authenticates to Azure via **GitHub OIDC federation** to the
+`10x-flowerpot-group-identity` user-assigned managed identity (see
+`infra/resources/group-identity.bicep`), which holds Contributor + RBAC
+Administrator on the resource group. No long-lived Azure credentials are
+stored in GitHub, except one exception below.
+
+**Table Storage access does NOT use managed identity.** Azure Static Web Apps'
+*managed* (built-in) Functions do not support managed identity at all — only
+"bring your own Functions" does (see [Azure docs][swa-functions-docs]). Since
+switching to a standalone Function App is a bigger architectural change than
+this MVP needs, the API instead reads a **storage account connection string**
+from the `STORAGE_CONNECTION_STRING` app setting (`api/src/lib/tableClient.ts`).
+
+The CI/CD pipeline fetches this connection string itself, using the
+OIDC-authenticated session (which has Contributor → can list storage keys),
+and injects it into the Static Web App's app settings on every deploy. The
+key is never stored as a GitHub secret.
+
+[swa-functions-docs]: https://learn.microsoft.com/en-us/azure/static-web-apps/apis-functions
+
+## GitHub Actions secrets & variables
+
+Repository secrets (`Settings → Secrets and variables → Actions → Secrets`):
+
+```
+AZURE_CLIENT_ID:              client ID of 10x-flowerpot-group-identity
+AZURE_TENANT_ID:              afd5ed7c-4a41-4a60-a161-9a22f7087a70
+AZURE_SUBSCRIPTION_ID:        0062944a-8e10-4dd4-9a69-5ccec140b4e9
+AZURE_STATIC_WEB_APP_API_KEY: deploy token from SWA (Settings → Manage deployment token)
+```
+
+Repository variables (`Settings → Secrets and variables → Actions → Variables`):
+
+```
+AZURE_RESOURCE_GROUP: 10x-flowerpot-group
+```
+
+`AZURE_STATIC_WEB_APP_API_KEY` is the one unavoidable long-lived secret —
+`Azure/static-web-apps-deploy@v1` requires it and has no OIDC alternative.
+
+## Federated credential subject
+
+GitHub injects immutable org/repo IDs into the OIDC token subject claim, so
+the federated credential subject must be the exact string, not just
+`repo:<owner>/<repo>:ref:refs/heads/main`. Check the actual value from a
+failed login's `AADSTS700213` error, or:
 
 ```bash
-# 1. Set environment variables
-export APP_NAME="10x-flowerpot-swa"
-export RESOURCE_GROUP="10x-flowerpot-group"
-export SUBSCRIPTION_ID="0062944a-8e10-4dd4-9a69-5ccec140b4e9"
-export TENANT_ID="afd5ed7c-4a41-4a60-a161-9a22f7087a70"
-export GITHUB_REPO="<owner>/<repo>"  # e.g., PawelKunka/10xDevs
-
-# 2. Create Azure AD Application for GitHub Actions
-az ad app create --display-name "github-actions-flowerpot" \
-  --query appId -o tsv > app-id.txt
-APP_ID=$(cat app-id.txt)
-
-# 3. Create Service Principal
-az ad sp create --id $APP_ID --query id -o tsv > sp-id.txt
-SP_ID=$(cat sp-id.txt)
-
-# 4. Grant Contributor role to service principal on resource group
-az role assignment create \
-  --role "Contributor" \
-  --assignee $SP_ID \
-  --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP"
-
-# 5. Setup OIDC federation (GitHub → Azure AD)
-az ad app federated-credential create \
-  --id $APP_ID \
-  --parameters '{
-    "name": "github-flowerpot",
-    "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:'"$GITHUB_REPO"':ref:refs/heads/main",
-    "audiences": ["api://AzureADTokenExchange"],
-    "description": "GitHub Actions for Flowerpot CI/CD"
-  }'
-
-echo "APP_ID=$APP_ID"
-echo "SERVICE_PRINCIPAL_ID=$SP_ID"
+az identity federated-credential show \
+  --name github-oidc \
+  --identity-name 10x-flowerpot-group-identity \
+  --resource-group 10x-flowerpot-group
 ```
 
-## GitHub Actions Secrets
+## Deployment process
 
-Add these to your GitHub repository secrets (`Settings → Secrets and variables → Actions`):
+1. **Push to `main`** → GitHub Actions triggers (see `.github/workflows/deploy.yml`)
+2. **Azure Login** via OIDC (`azure/login@v2` — required explicitly; `azure/cli@v2` does not auto-login)
+3. **Bicep deploy** — infra-first, idempotent
+4. **Configure Table Storage connection string** — fetches the storage key and sets it as an SWA app setting
+5. **Build & test** — root npm workspaces build, then `npm test`
+6. **Assemble API deploy package** — self-contained `api-dist/` (shared package is type-only, stripped from the runtime manifest)
+7. **Deploy** — `Azure/static-web-apps-deploy@v1` uploads frontend + API
 
-```
-AZURE_CLIENT_ID:         <APP_ID from above>
-AZURE_TENANT_ID:         afd5ed7c-4a41-4a60-a161-9a22f7087a70
-AZURE_SUBSCRIPTION_ID:   0062944a-8e10-4dd4-9a69-5ccec140b4e9
-AZURE_RESOURCE_GROUP:    10x-flowerpot-group
-AZURE_STATIC_WEB_APP_API_KEY: <deploy token from SWA, Settings → Manage deployment token>
-```
-
-## Deployment Process
-
-1. **Push to main** → GitHub Actions triggers
-2. **Bicep Deploy Step** (infra-first):
-   - Logs in via OIDC federation
-   - Deploys `infra/main.bicep`
-   - Upgrades SWA to Standard (if needed)
-   - Assigns Managed Identity + RBAC role
-3. **App Build Step**:
-   - Builds frontend (Vite)
-   - Builds API (tsc, CommonJS)
-   - Packages API as self-contained bundle
-4. **SWA Deploy Step**:
-   - Deploys frontend dist + API dist
-   - SWA uses Managed Identity for Table Storage access
-
-## Verifying Managed Identity Access
-
-After first deploy, verify the SWA can access Table Storage:
+## Verifying the deployment
 
 ```bash
-# 1. Get SWA's managed identity object ID
-SWA_PRINCIPAL_ID=$(az resource show \
-  --resource-group $RESOURCE_GROUP \
-  --name $APP_NAME \
-  --resource-type "Microsoft.Web/staticSites" \
-  --query identity.principalId -o tsv)
-
-echo "SWA Principal ID: $SWA_PRINCIPAL_ID"
-
-# 2. Check RBAC role assignment
-az role assignment list \
-  --assignee $SWA_PRINCIPAL_ID \
-  --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP" \
-  --output table
-
-# 3. Verify API can reach Table Storage (check app logs)
-az staticwebapp logs --resource-group $RESOURCE_GROUP --name $APP_NAME
+curl https://<swa-hostname>/api/health
+curl https://<swa-hostname>/api/species
+az storage table list --account-name 10xflowerpot --auth-mode login
 ```
 
-## Rollback (If Needed)
+## Local development
 
-If deployment fails, revert the Bicep state:
+`api/local.settings.json` (gitignored) sets `AzureWebJobsStorage=UseDevelopmentStorage=true`.
+`getTableClient()` falls back to the same value when `STORAGE_CONNECTION_STRING`
+is unset, which works against the Azurite emulator.
+
+## Rollback
 
 ```bash
-# Redeploy previous bicep version (git revert + push)
 git revert HEAD
 git push
-
-# Or manually downgrade SWA (via portal if necessary)
-az resource update \
-  --resource-group $RESOURCE_GROUP \
-  --name $APP_NAME \
-  --resource-type "Microsoft.Web/staticSites" \
-  --set sku.name=Free
 ```
-
-## Local Development
-
-For local development, `DefaultAzureCredential` will use:
-
-1. **Environment variables** (if `AZURE_STORAGE_ACCOUNT_NAME` is set)
-2. **Azure CLI credentials** (if you're logged in: `az login`)
-3. **Managed Identity** (if running on Azure VM/Container)
-4. **Storage Emulator** (Azurite, if configured)
-
-To test locally with real Storage Account:
-
-```bash
-# Ensure you're logged in to the correct tenant/subscription
-az login --tenant thenorthalliance.com
-
-# Start the API locally
-npm run start --workspace @flowerpot/api
-
-# API will use your local Azure CLI credentials to access Table Storage
-```
-
-## Cost Impact
-
-- **SWA Standard tier**: ~$9/month (vs. Free tier)
-  - Includes managed identity support
-  - Higher staging slots and custom domains
-  - Worth it for multi-tenant prod workload
-
-## Security Notes
-
-✅ **No connection strings in code** — All secrets removed.
-✅ **RBAC enforcement** — SWA identity can only read/write Table Storage (no blob, no queues).
-✅ **OIDC federation** — No long-lived secrets needed in GitHub.
-✅ **Per-environment auth** — Same code works in dev (CLI creds), CI/CD (OIDC), and prod (managed identity).
-
----
-
-**Next**: Run this deployment after confirming OIDC federation is set up.

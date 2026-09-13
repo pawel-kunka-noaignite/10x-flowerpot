@@ -28,7 +28,7 @@ Flowerpot — houseplant care scheduling (web/PWA). End-to-end TypeScript in an 
 - Tests are Vitest, co-located as `<name>.test.ts` next to the unit under test.
 - Commit subjects: imperative mood, capitalized, ≤ 50 chars, no trailing period.
 - `api/local.settings.json` is gitignored — never commit secrets there.
-- **Authentication (production)**: Managed Identity + RBAC for Table Storage. See DEPLOYMENT.md for OIDC setup. Code: @azure/identity + DefaultAzureCredential.
+- **Authentication (production)**: OIDC + user-assigned managed identity for CI/CD (see DEPLOYMENT.md). Table Storage access uses a connection string (`STORAGE_CONNECTION_STRING` app setting), NOT managed identity — SWA's managed Functions don't support it. Code: `api/src/lib/tableClient.ts`.
 - **Infrastructure (IaC)**: Bicep templates deployed via GitHub Actions (infra-first pattern). See .github/workflows/deploy.yml.
 
 ---
