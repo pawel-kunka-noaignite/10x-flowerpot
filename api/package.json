@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@azure/functions": "^4.0.0",
+    "@azure/data-tables": "^13.0.0",
     "@10x-flowerpot/shared": "*"
   },
   "devDependencies": {
