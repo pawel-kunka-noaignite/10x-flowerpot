@@ -161,10 +161,11 @@ absent.
 
 #### Automated
 
-- [ ] 1.1 API build passes
-- [ ] 1.2 API tests pass
-- [ ] 1.3 Root build passes
+- [x] 1.1 API build passes
+- [x] 1.2 API tests pass — oracle-verified: temporarily made `getUserId` always
+      return `null`, confirmed the happy-path test failed, then reverted.
+- [x] 1.3 Root build passes
 
 #### Manual
 
-- [ ] 1.4 `frontend/dist/staticwebapp.config.json` present after build
+- [x] 1.4 `frontend/dist/staticwebapp.config.json` present after build
