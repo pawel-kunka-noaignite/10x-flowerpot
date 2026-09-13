@@ -1,25 +1,24 @@
 import { TableClient } from "@azure/data-tables";
-import { DefaultAzureCredential } from "@azure/identity";
 
 /**
  * Initializes and returns a TableClient for the specified table in Azure Table Storage.
- * Uses DefaultAzureCredential, which respects:
- *   - Managed identity (production in Azure)
- *   - Environment variables (AzureWebJobsStorage with emulator in dev)
- *   - Local Azure CLI authentication
+ *
+ * Uses a connection string rather than managed identity because Azure Static Web
+ * Apps' *managed* Functions (our current hosting model) do not support managed
+ * identity at all — only "bring your own Functions" does. See DEPLOYMENT.md.
+ *
+ * Resolution order:
+ *   1. `STORAGE_CONNECTION_STRING` app setting (CI/CD injects this at deploy time
+ *      using the OIDC-authenticated session, so the key is never stored as a
+ *      long-lived GitHub secret).
+ *   2. `UseDevelopmentStorage=true` (Azurite emulator, local dev fallback).
  *
  * @param tableName - Name of the table to connect to
- * @param storageAccountName - Name of the storage account (must match infra/resources/storage-account.bicep)
  * @returns TableClient instance for the specified table
- * @throws Error if credentials cannot be resolved or storage account is not configured
  */
-export function getTableClient(
-  tableName: string,
-  storageAccountName: string = "10xflowerpot"
-): TableClient {
-  const storageUri = `https://${storageAccountName}.table.core.windows.net`;
+export function getTableClient(tableName: string): TableClient {
+  const connectionString =
+    process.env.STORAGE_CONNECTION_STRING ?? "UseDevelopmentStorage=true";
 
-  // Use DefaultAzureCredential which respects managed identity at runtime,
-  // environment variables in CI/dev, and local Azure CLI auth
-  return new TableClient(storageUri, tableName, new DefaultAzureCredential());
+  return TableClient.fromConnectionString(connectionString, tableName);
 }
