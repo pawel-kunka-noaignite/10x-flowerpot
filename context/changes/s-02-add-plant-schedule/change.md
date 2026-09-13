@@ -1,7 +1,7 @@
 ---
 id: s-02-add-plant-schedule
 title: Add Plant + Schedule
-status: in-progress
+status: implemented
 created: 2026-09-13
 completed_phases:
   - Phase 1a: Schedule Engine (✓)
