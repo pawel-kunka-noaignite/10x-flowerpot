@@ -1,0 +1,10 @@
+{
+  "routes": [
+    { "route": "/api/health", "allowedRoles": ["anonymous"] },
+    { "route": "/api/species", "allowedRoles": ["anonymous"] },
+    { "route": "/api/*", "allowedRoles": ["authenticated"] }
+  ],
+  "responseOverrides": {
+    "401": { "redirect": "/.auth/login/aad", "statusCode": 302 }
+  }
+}
