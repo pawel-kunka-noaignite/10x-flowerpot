@@ -6,7 +6,7 @@ created: 2026-07-26
 updated: 2026-09-13
 prd_version: 1
 main_goal: speed
-top_blocker: decisions
+top_blocker: none
 ---
 
 # Roadmap: Flowerpot
@@ -29,8 +29,8 @@ Flowerpot planuje pielęgnację roślin domowych jako per-roślinny harmonogram,
 
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 |---|---|---|---|---|---|
-| F-01 | data-persistence | (foundation) warstwa danych z izolacją per-user | — | NFR (izolacja danych), Access Control | blocked |
-| F-02 | auth-entra-external | (foundation) logowanie i weryfikacja tożsamości (Entra External ID + MSAL) | — | FR-001, FR-002, US-05 | ready |
+| F-01 | data-persistence | (foundation) warstwa danych z izolacją per-user | — | NFR (izolacja danych), Access Control | ready |
+| F-02 | auth-swa | (foundation) logowanie i weryfikacja tożsamości (wbudowane uwierzytelnianie Azure Static Web Apps) | — | FR-001, FR-002, US-05 | ready |
 | F-03 | species-seed | (foundation) kuratorowany seed ~15-20 gatunków z bazowymi interwałami | — | FR-030 | done |
 | S-01 | user-sign-in | zaloguje się i widzi wyłącznie własną (pustą) przestrzeń | F-02 | US-05, FR-001, FR-002 | proposed |
 | S-02 | add-plant-schedule | doda roślinę i od razu widzi wyliczony harmonogram | F-01, F-03, S-01 | US-01, FR-010, FR-020, FR-030 | proposed |
@@ -45,7 +45,7 @@ Navigation aid — groups items that share a Prerequisites chain. Canonical orde
 
 | Stream | Theme | Chain | Note |
 |---|---|---|---|
-| A | Tożsamość i dostęp | `F-02` → `S-01` | Niezależny tor; ready od startu. Odblokowuje per-user scoping w każdym slice. |
+| A | Tożsamość i dostęp | `F-02` → `S-01` | Niezależny tor; ready od startu (SWA built-in auth — zero nowego zasobu/tenantu). Odblokowuje per-user scoping w każdym slice. |
 | B | Rdzeń pielęgnacji | `F-01` → `S-02` → `S-03`, `S-04` → `S-05` → `S-06` | Główny tor produktu. `S-02` dołącza `S-01` (auth) i `F-03` (gatunki). `S-03` i `S-04` równoległe po `S-02`. |
 | C | Dane referencyjne | `F-03` | Standalone, zasila `S-02`. Ready od startu, bez zależności od datastore. |
 
@@ -65,29 +65,30 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ### F-01: Warstwa danych z izolacją per-user
 
-- **Outcome:** (foundation) wybrany i wpięty datastore z modelem `Plant` / `CareTask` / `CustomSpecies` powiązanym z właścicielem; każdy zapis i odczyt scoped do zalogowanego usera.
+- **Outcome:** (foundation) Azure Table Storage jako datastore, z modelem `Plant` / `CareTask` powiązanym z właścicielem (partition key = `userId`); każdy zapis i odczyt scoped do zalogowanego usera.
 - **Change ID:** data-persistence
 - **PRD refs:** NFR (izolacja danych — "user nigdy nie widzi cudzych danych"), Access Control
 - **Unlocks:** S-02, S-03, S-04 (żaden CRUD ani dashboard nie może persystować bez tej warstwy)
 - **Prerequisites:** —
 - **Parallel with:** F-02, F-03
 - **Blockers:** —
-- **Unknowns:**
-  - Wybór datastore (Azure SQL vs Table Storage vs Cosmos) + wariant backendu A (managed Functions) vs B (standalone Function App z managed identity) + sposób dostępu (connection string vs managed identity) — Owner: user. Block: yes.
-- **Risk:** Najwyżej-lewarowa decyzja MVP: przenika na schemat, kontrakt API i sposób izolacji per-user. Zgadywanie tu = rework całego rdzenia; stąd status blocked do czasu decyzji.
-- **Status:** blocked
+- **Unknowns:** —
+- **Decyzja (2026-09-13):** Azure Table Storage, wariant A (managed Functions, connection string w `local.settings.json` / App Settings), partition key = `userId` → naturalna izolacja per-user bez dodatkowej infrastruktury (zero nowego serwera SQL/Cosmos).
+- **Risk:** Decyzja podjęta pod kątem szybkości certyfikacji; Table Storage nie wymusza schematu, więc walidacja kształtu encji zostaje po stronie kodu (`@azure/data-tables`).
+- **Status:** ready
 
-### F-02: Logowanie i tożsamość (Entra External ID + MSAL)
+### F-02: Logowanie i tożsamość (Azure Static Web Apps built-in auth)
 
-- **Outcome:** (foundation) użytkownik może założyć konto i się zalogować; API weryfikuje token i wyciąga stabilne `userId` do scoping'u zasobów.
-- **Change ID:** auth-entra-external
+- **Outcome:** (foundation) użytkownik loguje się przez wbudowany dostawca Azure Static Web Apps (np. GitHub/Microsoft Entra ID konsumenckie); SWA wstrzykuje `x-ms-client-principal` do żądań `/api/*`, Functions wyciąga stabilne `userId` do scoping'u zasobów.
+- **Change ID:** auth-swa
 - **PRD refs:** FR-001, FR-002, US-05
 - **Unlocks:** S-01 (widoczne logowanie + redirect), oraz per-user scoping we wszystkich slice'ach rdzenia
 - **Prerequisites:** —
 - **Parallel with:** F-01, F-03
 - **Blockers:** —
 - **Unknowns:** —
-- **Risk:** Podejście zdecydowane (Entra External ID + MSAL, osobny tenant) — zostaje realna robota konfiguracyjna, ale bez otwartej niewiadomej blokującej planowanie.
+- **Decyzja (2026-09-13):** SWA built-in auth zamiast Entra External ID + MSAL — zero nowego tenantu/zasobu Azure; `staticwebapp.config.json` definiuje `routes`/`role`, Functions czytają nagłówek zamiast weryfikować JWT ręcznie.
+- **Risk:** Prostsze niż osobny tenant IdP; kompromis — mniejsza kontrola nad UX logowania, akceptowalny dla MVP certyfikacyjnego.
 - **Status:** ready
 
 ### F-03: Seed gatunków
@@ -182,8 +183,8 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 | Roadmap ID | Change ID | Suggested issue title | Ready for `/10x-plan` | Notes |
 |---|---|---|---|---|
-| F-01 | data-persistence | Wybór i wpięcie warstwy danych (per-user) | no | Blocked: decyzja datastore + wariant A/B + managed identity |
-| F-02 | auth-entra-external | Logowanie Entra External ID + MSAL | yes | Run `/10x-plan auth-entra-external` |
+| F-01 | data-persistence | Wpięcie warstwy danych (Azure Table Storage, per-user) | yes | Run `/10x-plan data-persistence` |
+| F-02 | auth-swa | Logowanie przez wbudowane uwierzytelnianie SWA | yes | Run `/10x-plan auth-swa` |
 | F-03 | species-seed | Seed ~15-20 gatunków z interwałami | yes | Run `/10x-plan species-seed` |
 | S-01 | user-sign-in | Logowanie i kontrola dostępu per-user | no | Wymaga F-02 |
 | S-02 | add-plant-schedule | Dodanie rośliny z wyliczonym harmonogramem | no | Wymaga F-01 (blocked), F-03, S-01 |
@@ -194,7 +195,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 
 ## Open Roadmap Questions
 
-1. **Wybór warstwy danych** (Azure SQL vs Table Storage vs Cosmos) + wariant backendu A (managed Functions) vs B (standalone Function App z managed identity) + sposób dostępu (connection string vs managed identity) — Owner: user. Block: F-01 (→ S-02, S-03, S-04, S-05, S-06).
+Brak otwartych pytań blokujących — F-01 i F-02 rozstrzygnięte pivotami z 2026-09-13 (patrz Foundations wyżej).
 
 ## Parked
 
