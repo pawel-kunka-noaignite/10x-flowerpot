@@ -106,6 +106,7 @@ export function Dashboard({ showAddForm, onCloseAddForm }: DashboardProps) {
 
 const styles = {
   container: {
+    width: '100%',
     padding: '2rem',
     maxWidth: '1100px',
     margin: '0 auto',
