@@ -107,7 +107,7 @@ export function Dashboard({ showAddForm, onCloseAddForm }: DashboardProps) {
 const styles = {
   container: {
     padding: '2rem',
-    maxWidth: '900px',
+    maxWidth: '1100px',
     margin: '0 auto',
   },
   heading: {
@@ -115,7 +115,7 @@ const styles = {
   },
   plantsList: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
     gap: '1.5rem',
     marginTop: '1.5rem',
   },
