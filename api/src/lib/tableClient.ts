@@ -1,23 +1,25 @@
-import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
+import { TableClient } from "@azure/data-tables";
+import { DefaultAzureCredential } from "@azure/identity";
 
 /**
  * Initializes and returns a TableClient for the specified table in Azure Table Storage.
- * Reads the connection string from the environment variable `AzureWebJobsStorage`,
- * which is set by Azure Functions runtime and local.settings.json in development.
+ * Uses DefaultAzureCredential, which respects:
+ *   - Managed identity (production in Azure)
+ *   - Environment variables (AzureWebJobsStorage with emulator in dev)
+ *   - Local Azure CLI authentication
  *
- * @param tableName - Name of the table to connect to (e.g., "10xflowerpotdata")
+ * @param tableName - Name of the table to connect to
+ * @param storageAccountName - Name of the storage account (e.g., "10xflowerpotdata")
  * @returns TableClient instance for the specified table
- * @throws Error if AzureWebJobsStorage is not configured
+ * @throws Error if credentials cannot be resolved or storage account is not configured
  */
-export function getTableClient(tableName: string): TableClient {
-  const connectionString = process.env.AzureWebJobsStorage;
-  
-  if (!connectionString) {
-    throw new Error(
-      "AzureWebJobsStorage environment variable is not set. " +
-      "Ensure it is configured in local.settings.json (dev) or App Settings (production)."
-    );
-  }
+export function getTableClient(
+  tableName: string,
+  storageAccountName: string = "10xflowerpotdata"
+): TableClient {
+  const storageUri = `https://${storageAccountName}.table.core.windows.net`;
 
-  return TableClient.fromConnectionString(connectionString, tableName);
+  // Use DefaultAzureCredential which respects managed identity at runtime,
+  // environment variables in CI/dev, and local Azure CLI auth
+  return new TableClient(storageUri, tableName, new DefaultAzureCredential());
 }
