@@ -47,6 +47,9 @@ jobs:
           npm ci
           npm run build
 
+      - name: Run tests
+        run: npm test
+
       # Assemble a self-contained Functions package. @10x-flowerpot/shared is
       # imported type-only, so it is erased at compile time and is NOT a
       # runtime dependency — we drop it from the deploy manifest and install
