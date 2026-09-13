@@ -108,7 +108,7 @@ const styles = {
   container: {
     width: '100%',
     padding: '2rem',
-    maxWidth: '1100px',
+    maxWidth: '1000px',
     margin: '0 auto',
   },
   heading: {
@@ -116,7 +116,7 @@ const styles = {
   },
   plantsList: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
     gap: '1.5rem',
     marginTop: '2.5rem',
   },
