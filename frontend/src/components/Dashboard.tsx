@@ -109,6 +109,7 @@ const styles = {
     width: '100%',
     padding: '2rem',
     margin: '0 auto',
+    boxSizing: 'border-box' as const,
   },
   heading: {
     color: 'var(--text-h)',
