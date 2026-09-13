@@ -15,6 +15,8 @@ import { getSpeciesById } from "../data/speciesSeed";
  * HTTP handler for plant endpoints.
  * GET: List all plants for the authenticated user
  * POST: Create a new plant for the authenticated user (with initial schedule)
+ * PUT: Update an existing plant for the authenticated user
+ * DELETE: Delete a plant for the authenticated user
  */
 async function plants(
   request: HttpRequest,
@@ -86,6 +88,40 @@ async function plants(
       };
     }
 
+    if (request.method === "PUT") {
+      const body = await request.json();
+      const { plantId, ...partialPlant } = body as { plantId: string } & Record<string, unknown>;
+
+      if (!plantId) {
+        return {
+          status: 400,
+          jsonBody: { error: "Missing required field: plantId" },
+        };
+      }
+
+      const updated = await updatePlant(userId, plantId, partialPlant as Partial<Plant>);
+      return {
+        status: 200,
+        jsonBody: updated,
+      };
+    }
+
+    if (request.method === "DELETE") {
+      const plantId = request.query.get("id");
+
+      if (!plantId) {
+        return {
+          status: 400,
+          jsonBody: { error: "Missing required query parameter: id" },
+        };
+      }
+
+      await deletePlant(userId, plantId);
+      return {
+        status: 204,
+      };
+    }
+
     // Method not allowed
     return {
       status: 405,
@@ -113,7 +149,7 @@ async function plants(
 }
 
 app.http('plants', {
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   authLevel: 'anonymous',
   handler: plants,
 });
