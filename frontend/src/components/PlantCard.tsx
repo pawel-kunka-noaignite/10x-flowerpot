@@ -101,10 +101,10 @@ function getLightBadge(lightExposure: string): string {
 const styles = {
   card: {
     padding: '1.5rem',
-    border: '1px solid #ddd',
+    border: '1px solid var(--border)',
     borderRadius: '8px',
-    backgroundColor: 'white',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    backgroundColor: 'var(--code-bg)',
+    boxShadow: 'var(--shadow)',
   },
   header: {
     display: 'flex',
@@ -116,12 +116,12 @@ const styles = {
     margin: '0',
     fontSize: '1.3rem',
     fontWeight: 'bold',
-    color: '#333',
+    color: 'var(--text-h)',
   },
   badge: {
     padding: '0.25rem 0.75rem',
-    backgroundColor: '#e8f5e9',
-    color: '#2e7d32',
+    backgroundColor: 'var(--accent-bg)',
+    color: 'var(--accent)',
     borderRadius: '12px',
     fontSize: '0.85rem',
     fontWeight: '500',
@@ -129,7 +129,7 @@ const styles = {
   species: {
     margin: '0 0 1rem 0',
     fontSize: '0.95rem',
-    color: '#666',
+    color: 'var(--text)',
   },
   tasksContainer: {
     marginTop: '1rem',
@@ -138,12 +138,12 @@ const styles = {
     margin: '0 0 0.75rem 0',
     fontSize: '0.95rem',
     fontWeight: '600',
-    color: '#555',
+    color: 'var(--text-h)',
   },
   noTasks: {
     margin: '0',
     fontSize: '0.9rem',
-    color: '#999',
+    color: 'var(--text)',
     fontStyle: 'italic',
   },
   tasksList: {
@@ -155,14 +155,14 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     padding: '0.5rem 0',
-    borderBottom: '1px solid #f0f0f0',
+    borderBottom: '1px solid var(--border)',
     fontSize: '0.9rem',
   },
   taskAction: {
     fontWeight: '600',
-    color: '#4caf50',
+    color: 'var(--accent)',
   },
   taskDue: {
-    color: '#666',
+    color: 'var(--text)',
   },
 };
