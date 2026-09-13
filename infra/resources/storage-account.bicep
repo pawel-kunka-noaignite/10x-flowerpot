@@ -15,6 +15,14 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 
   resource tableService 'tableServices' = {
     name: 'default'
+
+    resource plantsTable 'tables' = {
+      name: 'flowerpotdata'
+    }
+
+    resource tasksTable 'tables' = {
+      name: 'flowerpottasks'
+    }
   }
 }
 
