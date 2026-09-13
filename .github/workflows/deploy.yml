@@ -28,11 +28,31 @@ jobs:
           allow-no-subscriptions: false
 
       - name: Deploy Infrastructure (Bicep)
+        id: infra
         run: |
           az deployment group create \
             --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
             --template-file infra/main.bicep \
-            --parameters deploymentTrigger=Automatic
+            --parameters deploymentTrigger=Automatic \
+            --query "properties.outputs" -o json > infra-outputs.json
+          echo "static_web_app_name=$(jq -r .staticWebAppName.value infra-outputs.json)" >> "$GITHUB_OUTPUT"
+          echo "storage_account_name=$(jq -r .storageAccountName.value infra-outputs.json)" >> "$GITHUB_OUTPUT"
+
+      # Managed (built-in) Functions in Static Web Apps do not support managed
+      # identity (only "bring your own Functions" does — see DEPLOYMENT.md).
+      # We fetch the storage account key using the already OIDC-authenticated
+      # session and inject it as an app setting, so the key is never stored as
+      # a long-lived GitHub secret.
+      - name: Configure Table Storage connection string
+        run: |
+          CONN_STRING=$(az storage account show-connection-string \
+            --name ${{ steps.infra.outputs.storage_account_name }} \
+            --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+            --query connectionString -o tsv)
+          az staticwebapp appsettings set \
+            --name ${{ steps.infra.outputs.static_web_app_name }} \
+            --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+            --setting-names STORAGE_CONNECTION_STRING="$CONN_STRING"
 
       - name: Setup Node
         uses: actions/setup-node@v4
