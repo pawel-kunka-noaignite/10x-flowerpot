@@ -12,14 +12,15 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@azure/functions": "^4.0.0",
+    "@10x-flowerpot/shared": "*",
     "@azure/data-tables": "^13.0.0",
-    "@10x-flowerpot/shared": "*"
+    "@azure/functions": "^4.0.0",
+    "@azure/identity": "^4.13.2"
   },
   "devDependencies": {
     "@types/node": "18.x",
-    "typescript": "^5.0.0",
     "rimraf": "^5.0.0",
+    "typescript": "^5.0.0",
     "vitest": "^3.2.4"
   }
 }
